@@ -50,7 +50,7 @@ def alto_text(xml, xmlns):
     # Ensure use of UTF-8
     if isinstance(sys.stdout, io.TextIOWrapper) and sys.stdout.encoding != 'UTF-8':
         sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
-    text = ''
+    text = []
     # Find all <TextLine> elements
     for lines in xml.iterfind('.//{%s}TextLine' % xmlns):
         # New line after every <TextLine> element
@@ -59,10 +59,10 @@ def alto_text(xml, xmlns):
             # Check if there are no hyphenated words
             if ('SUBS_CONTENT' not in line.attrib and 'SUBS_TYPE' not in line.attrib):
             # Get value of attribute @CONTENT from all <String> elements
-                text += line.attrib.get('CONTENT') + ' '
+                text.append(line.attrib.get('CONTENT') + ' ')
             else:
                 if ('HypPart1' in line.attrib.get('SUBS_TYPE')):
-                    text += line.attrib.get('SUBS_CONTENT') + ' '
+                    text.append(line.attrib.get('SUBS_CONTENT') + ' ')
                     if ('HypPart2' in line.attrib.get('SUBS_TYPE')):
                         pass
     return text
