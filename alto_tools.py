@@ -68,6 +68,45 @@ def alto_text(xml, xmlns):
     return text
 
 
+def alto_text_coordinates(xml, xmlns):
+    """ Extract text content from ALTO xml file """
+    # Ensure use of UTF-8
+    if isinstance(sys.stdout, io.TextIOWrapper) and sys.stdout.encoding != 'UTF-8':
+        sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
+    content = []
+    # Find all <TextLine> elements
+    for lines in xml.iterfind('.//{%s}TextLine' % xmlns):
+        # New line after every <TextLine> element
+        # Find all <String> elements
+        for line in lines.findall('{%s}String' % xmlns):
+            # Check if there are no hyphenated words
+            if ('SUBS_CONTENT' not in line.attrib and 'SUBS_TYPE' not in line.attrib):
+            # Get value of attribute @CONTENT from all <String> elements
+                content.append({
+                    'text': line.attrib.get('CONTENT'),
+                    'height': line.attrib.get('HEIGHT'),
+                    'width': line.attrib.get('WIDTH'),
+                    'hpos': line.attrib.get('HPOS'),
+                    'vpos': line.attrib.get('VPOS'),
+                    'accuracy': line.attrib.get('WC'),
+                    'id': line.attrib.get('ID')
+                })
+            else:
+                if ('HypPart1' in line.attrib.get('SUBS_TYPE')):
+                    content.append({
+                        'text': line.attrib.get('SUBS_CONTENT'),
+                        'height': line.attrib.get('HEIGHT'),
+                        'width': line.attrib.get('WIDTH'),
+                        'hpos': line.attrib.get('HPOS'),
+                        'vpos': line.attrib.get('VPOS'),
+                        'accuracy': line.attrib.get('WC'),
+                        'id': line.attrib.get('ID')
+                    })
+                    if ('HypPart2' in line.attrib.get('SUBS_TYPE')):
+                        pass
+    return content
+
+
 def alto_illustrations(xml, xmlns):
     """ Extract bounding boxes of illustration from ALTO xml file """
     # Find all <Illustration> elements
